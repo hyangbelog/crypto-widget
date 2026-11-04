@@ -8,12 +8,13 @@
     body { margin: 0; padding: 0; background: transparent; }
     .indodax-widget {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      max-width: 330px;
+      max-width: 350px;
       background: #f8f9fa;
       border: 1px solid #e0e0e0;
       border-radius: 12px;
       padding: 15px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      margin: 10px auto;
     }
     .crypto-card {
       background: #ffffff;
@@ -22,6 +23,8 @@
       margin-bottom: 10px;
       border-left: 4px solid #4a90e2;
       display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .crypto-info { display: flex; flex-direction: column; width: 100%; }
     .crypto-name { font-size: 14px; color: #666666; font-weight: 600; margin-bottom: 4px; }
@@ -38,12 +41,14 @@
       <span class="crypto-price" id="btc-price">Memuat...</span>
     </div>
   </div>
+  
   <div class="crypto-card">
     <div class="crypto-info">
       <span class="crypto-name">Ethereum (ETH)</span>
       <span class="crypto-price" id="eth-price">Memuat...</span>
     </div>
   </div>
+  
   <div class="crypto-card">
     <div class="crypto-info">
       <span class="crypto-name">Tether (USDT)</span>
@@ -57,12 +62,17 @@
   function formatRupiah(numberString) {
     const number = parseFloat(numberString);
     if (isNaN(number)) return "Rp 0";
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(number);
   }
 
-  async function fetchPrices() {
+  async function fetchCryptoPrices() {
     try {
-      // API Publik Coinbase yang stabil, akurat dalam Rupiah, dan didukung penuh oleh browser
+      // Mengambil data harga langsung dari Coinbase API (Bebas CORS & Tanpa API Key)
       const [btcRes, ethRes, usdtRes] = await Promise.all([
         fetch('https://coinbase.com'),
         fetch('https://coinbase.com'),
@@ -73,20 +83,27 @@
       const ethData = await ethRes.json();
       const usdtData = await usdtRes.json();
 
-      document.getElementById('btc-price').innerText = formatRupiah(btcData.data.amount);
-      document.getElementById('eth-price').innerText = formatRupiah(ethData.data.amount);
-      document.getElementById('usdt-price').innerText = formatRupiah(usdtData.data.amount);
-    } catch (e) {
-      console.error(e);
-      document.getElementById('btc-price').innerText = "Gagal memuat";
-      document.getElementById('eth-price').innerText = "Gagal memuat";
-      document.getElementById('usdt-price').innerText = "Gagal memuat";
+      if (btcData && btcData.data) {
+        document.getElementById('btc-price').innerText = formatRupiah(btcData.data.amount);
+      }
+      if (ethData && ethData.data) {
+        document.getElementById('eth-price').innerText = formatRupiah(ethData.data.amount);
+      }
+      if (usdtData && usdtData.data) {
+        document.getElementById('usdt-price').innerText = formatRupiah(usdtData.data.amount);
+      }
+
+    } catch (error) {
+      console.error('Koneksi API bermasalah:', error);
+      document.getElementById('btc-price').innerText = "Koneksi Sibuk";
+      document.getElementById('eth-price').innerText = "Koneksi Sibuk";
+      document.getElementById('usdt-price').innerText = "Koneksi Sibuk";
     }
   }
-  
-  fetchPrices();
-  setInterval(fetchPrices, 30000); // Sinkronisasi berkala setiap 30 detik
+
+  fetchCryptoPrices();
+  setInterval(fetchCryptoPrices, 30000);
 </script>
+
 </body>
 </html>
-
