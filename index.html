@@ -1,1 +1,92 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crypto Live Widget</title>
+  <style>
+    body { margin: 0; padding: 0; background: transparent; }
+    .indodax-widget {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 330px;
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .crypto-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #4a90e2;
+      display: flex;
+    }
+    .crypto-info { display: flex; flex-direction: column; width: 100%; }
+    .crypto-name { font-size: 14px; color: #666666; font-weight: 600; margin-bottom: 4px; }
+    .crypto-price { font-size: 18px; color: #222222; font-weight: 700; }
+    .widget-footer { font-size: 11px; color: #999999; text-align: center; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="indodax-widget">
+  <div class="crypto-card">
+    <div class="crypto-info">
+      <span class="crypto-name">Bitcoin (BTC)</span>
+      <span class="crypto-price" id="btc-price">Memuat...</span>
+    </div>
+  </div>
+  <div class="crypto-card">
+    <div class="crypto-info">
+      <span class="crypto-name">Ethereum (ETH)</span>
+      <span class="crypto-price" id="eth-price">Memuat...</span>
+    </div>
+  </div>
+  <div class="crypto-card">
+    <div class="crypto-info">
+      <span class="crypto-name">Tether (USDT)</span>
+      <span class="crypto-price" id="usdt-price">Memuat...</span>
+    </div>
+  </div>
+  <div class="widget-footer">Live Price • Update otomatis</div>
+</div>
+
+<script>
+  function formatRupiah(numberString) {
+    const number = parseFloat(numberString);
+    if (isNaN(number)) return "Rp 0";
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+  }
+
+  async function fetchPrices() {
+    try {
+      // API Publik Coinbase yang stabil, akurat dalam Rupiah, dan didukung penuh oleh browser
+      const [btcRes, ethRes, usdtRes] = await Promise.all([
+        fetch('https://coinbase.com'),
+        fetch('https://coinbase.com'),
+        fetch('https://coinbase.com')
+      ]);
+
+      const btcData = await btcRes.json();
+      const ethData = await ethRes.json();
+      const usdtData = await usdtRes.json();
+
+      document.getElementById('btc-price').innerText = formatRupiah(btcData.data.amount);
+      document.getElementById('eth-price').innerText = formatRupiah(ethData.data.amount);
+      document.getElementById('usdt-price').innerText = formatRupiah(usdtData.data.amount);
+    } catch (e) {
+      console.error(e);
+      document.getElementById('btc-price').innerText = "Gagal memuat";
+      document.getElementById('eth-price').innerText = "Gagal memuat";
+      document.getElementById('usdt-price').innerText = "Gagal memuat";
+    }
+  }
+  
+  fetchPrices();
+  setInterval(fetchPrices, 30000); // Sinkronisasi berkala setiap 30 detik
+</script>
+</body>
+</html>
 
